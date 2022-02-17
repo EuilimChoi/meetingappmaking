@@ -26,17 +26,14 @@ socket.addEventListener("close", ()=>{
 function handleSubmit(e){
     e.preventDefault();
     const input = messageform.querySelector("input");
-    const nickname = nicknameform.querySelector("input");
-    socket.send(JSON.stringify({nickname : nickname.value, msg : input.value}));
-    console.log({'nickname' : nickname.value, 'msg' : input.value});
+    socket.send(JSON.stringify({type : "message", payload : input.value}));
     input.value="";
 }
 
 function handlenickSubmit(e){
     e.preventDefault();
     const input = nicknameform.querySelector("input");
-    socket.send(input.value.toString());
-    input.value="";
+    socket.send(JSON.stringify({type : "nickname", payload : input.value}));
 }
 
 messageform.addEventListener("submit", handleSubmit)

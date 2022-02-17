@@ -1,3 +1,4 @@
+import { Socket } from "dgram";
 import express from "express";
 import http from "http"
 import WebSocket from "ws";
@@ -20,12 +21,23 @@ const sockets = [];
 
 wss.on("connection",(socket)=>{
         sockets.push(socket);
+        socket["nickname"] = "Somebody";
         socket.send("Hello!");
         console.log("Connected with Browser");
         socket.on("close", ()=>console.log("disconnected from Browser"));
-        socket.on("message",(message)=>console.log(message))
-        socket.on("message",(message)=>{sockets.forEach(aSocket => aSocket.send(
-            JSON.parse(message)))});
+        socket.on("message",(message)=>console.log(JSON.parse(message)));
+        socket.on("message",(message)=>{
+            const parsed = JSON.parse(message)
+            switch (parsed.type) {
+                case "message": 
+                    sockets.forEach((aSoket)=> aSoket.send(`${socket.nickname} : ${parsed.payload}`));
+                    break;
+
+                case "nickname":
+                    socket["nickname"] = parsed.payload;
+                    break;
+            }
+        });
     })
 
 server.listen(3000, handleListen);
