@@ -23,7 +23,9 @@ wss.on("connection",(socket)=>{
         socket.send("Hello!");
         console.log("Connected with Browser");
         socket.on("close", ()=>console.log("disconnected from Browser"));
-        socket.on("message",(message)=>{sockets.forEach(aSocket => aSocket.send(message.toString()))});
+        socket.on("message",(message)=>console.log(message))
+        socket.on("message",(message)=>{sockets.forEach(aSocket => aSocket.send(
+            JSON.parse(message)))});
     })
 
 server.listen(3000, handleListen);
