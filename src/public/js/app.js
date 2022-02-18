@@ -1,40 +1,15 @@
+const socket = io(); // 최초에 소켓아이오를 설치하면 앱과 서버를 연결시키는 함수 io가 생성되고 사용자는 그냥 함수를 사용해서 앱과 서버를 연결할 수 있다.
 
-const socket = new WebSocket(`ws://${window.location.host}`)
+const welcome = document.getElementById("welcome")
+const form = welcome.querySelector("form")
 
-const messagelist = document.querySelector("ul");
-const nicknameform = document.querySelector("#nickname");
-const messageform = document.querySelector("#message");
-
-
-socket.addEventListener("open", ()=>{
-    console.log("Connected to Browser!")
-})
-
-socket.addEventListener("message", (message)=>{
-    
-    const li = document.createElement("li");
-    li.innerText = message.data;
-    messagelist.append(li);
-})
-
-
-
-socket.addEventListener("close", ()=>{
-    console.log(`disconnect from Server`)
-})
-
-function handleSubmit(e){
+function handleRoomSubmit(e){
     e.preventDefault();
-    const input = messageform.querySelector("input");
-    socket.send(JSON.stringify({type : "message", payload : input.value}));
-    input.value="";
-}
+    const input = form.querySelector("input")
+    socket.emit("room",{payload : input.value}
+    )
+    input.value ="";
 
-function handlenickSubmit(e){
-    e.preventDefault();
-    const input = nicknameform.querySelector("input");
-    socket.send(JSON.stringify({type : "nickname", payload : input.value}));
-}
 
-messageform.addEventListener("submit", handleSubmit)
-nicknameform.addEventListener("submit", handlenickSubmit)
+
+form.addEventListener("submit", handleRoomSubmit);
