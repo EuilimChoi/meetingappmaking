@@ -21,8 +21,14 @@ const server = http.createServer(app) // express는 SW를 지원하지 않기 �
 const io = SocketIO(server);
 
 io.on("connection",(socket)=>{
-    socket.on("room", (msg, done) => {
-        console.log(msg)
+    socket.onAny((event) => {
+        // 이 함수는 소켓으로 발생하는 모든 이벤트를 감지한다.
+        console.log(`Socket Event : ${event}`);
+    });
+    socket.on("room", (roomName, done) => {
+        socket.join(roomName);
+        done();
+
 
     })
 })
