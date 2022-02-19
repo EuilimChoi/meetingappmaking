@@ -6,16 +6,19 @@ const form = welcome.querySelector("form")
 
 room.hidden = true;
 
+let roomName
+
 function showRoom(){
     welcome.hidden = true;
     room.hidden = false;
     const title = room.querySelector("h1")
-    title.innerText = "방제목"
+    title.innerText = `방제목: ${roomName}`
 }
 
 function handleRoomSubmit(e){
     e.preventDefault();
     const input = form.querySelector("input")
+    roomName = input.value
     socket.emit("room",input.value, showRoom) 
     /* 개쩌는게 처음 인자를 빼고 뒤에 오는 모든 인자 (객체든 함수던) 백엔드로 보낼수 있음,
     함수를 보내는 경우 실제 실행되는 곳은 프론트엔드다. 백엔드에서 해당함수를 실행시킬때 인자를 넣어주면
