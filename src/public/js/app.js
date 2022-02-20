@@ -1,8 +1,9 @@
 const socket = io(); // 최초에 소켓아이오를 설치하면 앱과 서버를 연결시키는 함수 io가 생성되고 사용자는 그냥 함수를 사용해서 앱과 서버를 연결할 수 있다.
 
 const welcome = document.getElementById("welcome")
-const room = document.getElementById("room")
 const form = welcome.querySelector("form")
+const room = document.getElementById("room")
+const message = room.querySelector("form")
 
 room.hidden = true;
 
@@ -17,9 +18,9 @@ function showRoom(){
 
 function handleRoomSubmit(e){
     e.preventDefault();
-    const input = form.querySelector("input")
+    const input = welcome.querySelector("input")
     roomName = input.value
-    socket.emit("room",input.value, showRoom) 
+    socket.emit("room",roomName, showRoom) 
     /* 개쩌는게 처음 인자를 빼고 뒤에 오는 모든 인자 (객체든 함수던) 백엔드로 보낼수 있음,
     함수를 보내는 경우 실제 실행되는 곳은 프론트엔드다. 백엔드에서 해당함수를 실행시킬때 인자를 넣어주면
     프론트에서 해당 인자를 가지고 함수가 실행되어 결과가 출력된다. 
@@ -29,6 +30,35 @@ function handleRoomSubmit(e){
 
     input.value ="";}
 
+function handleMessage(e){
+    e.preventDefault();
+    const input = message.querySelector("input")
+    sendmessage = input.value
+    socket.emit("message",sendmessage)
+    addmessage(sendmessage)
+    input.value ="";
+}
+
+function addmessage(message) {
+    const ul = document.querySelector("ul");
+    const li = document.createElement("li");
+    li.innerText=message;
+    ul.appendChild(li);
+
+}
 
 
 form.addEventListener("submit", handleRoomSubmit);
+message.addEventListener("submit", handleMessage)
+
+socket.on("welcome",()=>{
+    addmessage("Someone joind!")
+})
+
+socket.on("bye",()=>{
+    addmessage("Someone left")})
+
+socket.on("message", (message)=>{
+    console.log(message)
+    addmessage(message)
+})
