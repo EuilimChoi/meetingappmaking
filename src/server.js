@@ -1,3 +1,4 @@
+import { doesNotReject } from "assert";
 import { Socket } from "dgram";
 import express from "express";
 import http from "http"
@@ -25,17 +26,22 @@ io.on("connection",(socket)=>{
         // 이 함수는 소켓으로 발생하는 모든 이벤트를 감지한다.
         console.log(`Socket Event : ${event}`);
     });
+
     socket.on("room", (roomName, done) => {
+        socket["nickname"] = "Anon"
         socket.join(roomName);
         done();
-        console.log(socket.rooms)
-        console.log(socket)
-        socket.to(roomName).emit("welcome")
+        socket.to(roomName).emit("welcome", socket.nickname)
         socket.on("disconnecting",()=>{
-            socket.rooms.forEach(room => socket.to(room).emit("bye"))
+            socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname))
         })
-        socket.on("message", (message)=>{
-            socket.rooms.forEach(room => socket.to(room).emit("message", message))
+        socket.on("message", (message,room,done)=>{
+            socket.to(room).emit("message",`${socket["nickname"]} : ${message}`);
+            done()
+        })
+        socket.on("nickname",(nickname)=>{
+            console.log(nickname)
+            socket["nickname"] = nickname;
         })
     })
 })

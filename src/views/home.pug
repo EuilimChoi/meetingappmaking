@@ -18,9 +18,12 @@ html(lang = "en")
                     button Enter Room
 
             dev#room
-                h1 
+                h1
+                form#name 
+                    input(placeholder = "Nick Name", required, type = "text")
+                    button Change
                 ul
-                form(action="")
+                form#msg
                     input(placeholder = "Message", required, type = "text")
                     button Send
 
