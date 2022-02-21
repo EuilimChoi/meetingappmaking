@@ -10,12 +10,13 @@ room.hidden = true;
 let roomName
 let sendmessage
 let nickname
+let newCount
 
-function showRoom(){
+function showRoom(newCount){
     welcome.hidden = true;
     room.hidden = false;
     const title = room.querySelector("h1")
-    title.innerText = `방제목: ${roomName}`
+    title.innerText = `방제목: ${roomName} / 참여인원: ${newCount}`
     const msgform = room.querySelector("#msg");
     const nameform = room.querySelector("#name");
     msgform.addEventListener("submit",handleMessage);
@@ -54,7 +55,7 @@ function handleMessage(e){
 }
 
 function addmessage(message) {
-    const ul = document.querySelector("ul");
+    const ul = document.querySelector("#room ul");
     const li = document.createElement("li");
     li.innerText=message;
     ul.appendChild(li);
@@ -63,11 +64,30 @@ function addmessage(message) {
 
 form.addEventListener("submit", handleRoomSubmit);
 
-socket.on("welcome",(nickname)=>{
+socket.on("welcome",(nickname, newCount)=>{
+    const title = room.querySelector("h1")
+    newCount = newCount;
+    title.innerText = `방제목: ${roomName} / 참여인원: ${newCount}`
     addmessage(`${nickname} joind!`)
 })
 
-socket.on("bye",(nickname)=>{
+socket.on("bye",(nickname, newCount)=>{
+    const title = room.querySelector("h1")
+    newCount = newCount;
+    title.innerText = `방제목: ${roomName} / 참여인원: ${newCount}`
     addmessage(`${nickname}  left`)})
 
 socket.on("message", addmessage)
+
+socket.on("room_change", (rooms)=> {
+    const roomlist = welcome.querySelector("ul");
+    roomlist.innerText = "";
+    if(rooms.length === 0){
+        return;
+    }
+    rooms.forEach((room) => {
+        const li = document.createElement("li");
+        li.innerText=room;
+        roomlist.append(li);
+    });
+});

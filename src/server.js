@@ -21,24 +21,55 @@ const server = http.createServer(app) // express는 SW를 지원하지 않기 �
 //const wss = new WebSocket.Server({server});
 const io = SocketIO(server);
 
+function publicRooms(){
+    const {sockets:{adapter:{sids,rooms}}} = io
+    // const sids = io.sockets.adapter.sids;
+    // const rooms = io.socket.adapter.rooms;
+    const publicRooms = [];
+
+    rooms.forEach((value,key) => {
+        if(!sids.get(key)){
+            publicRooms.push(key)
+        }
+    })
+
+    return publicRooms
+}
+
+function countRoom(roomName){
+    return io.sockets.adapter.rooms.get(roomName).size ?  io.sockets.adapter.rooms.get(roomName).size : 1;
+}
+
+io.sockets.emit("room_change",publicRooms());
+
 io.on("connection",(socket)=>{
+    io.sockets.emit("room_change",publicRooms());
     socket.onAny((event) => {
         // 이 함수는 소켓으로 발생하는 모든 이벤트를 감지한다.
         console.log(`Socket Event : ${event}`);
     });
 
     socket.on("room", (roomName, done) => {
+
         socket["nickname"] = "Anon"
         socket.join(roomName);
-        done();
-        socket.to(roomName).emit("welcome", socket.nickname)
+        done(countRoom(roomName));
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+        io.sockets.emit("room_change",publicRooms());
+
         socket.on("disconnecting",()=>{
-            socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname))
+            socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room)-1))
         })
+
+        socket.on("disconnet",() =>{
+            io.sockets.emit("room_change",publicRooms());
+        })
+
         socket.on("message", (message,room,done)=>{
             socket.to(room).emit("message",`${socket["nickname"]} : ${message}`);
             done()
         })
+
         socket.on("nickname",(nickname)=>{
             console.log(nickname)
             socket["nickname"] = nickname;
